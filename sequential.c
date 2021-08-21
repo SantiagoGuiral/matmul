@@ -19,20 +19,10 @@ void mm(int matrixSize, double** a, double** b, double** c) {
 	}
 }
 
-void serial(FILE* fh, int nmats, int matrixSize, double** a, double** b, double** c){
-	int i,j,k;
-	for(k=0;k<nmats;k++){
-		for(i=0;i<matrixSize;i++){
-			for(j=0;j<matrixSize;j++){
-				fscanf(fh, "%lf", &a[i][j]);
-			}
-		}
-		for(i=0;i<matrixSize;i++){
-			for(j=0;j<matrixSize;j++){
-				fscanf(fh, "%lf", &b[i][j]);
-			}
-		}
-
+void seq(double ****data, double **a, double **b, double **c, int matrixSize, int nmats){
+	int i;
+	for(i=0;i<nmats;i++){
+		getMatrices(data,a,b,matrixSize,i);
 		printf("Sequential... Multiplying two matrices...\n"); //Remove this line for performance tests
 		mm(matrixSize,a,b,c);
 		printResult(matrixSize, c); //Remove this line for performance tests

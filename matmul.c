@@ -4,7 +4,7 @@
  Author      : Santiago Rios - Emmanuel Gomez
  Version     :
  Copyright   : Your copyright notice
- Description : 
+ Description : Matmul main file 
  ============================================================================
  */
 
@@ -31,20 +31,28 @@ int main(int argc, char **argv) {
 	//printf("The number of threads is: %d\n",threads);
 
 	//Pointers to the Matrices
-	double **a, **b, **c, ***coarse, **fine;
+	double **a, **b, **c;
+	double ****data;
+	double **fine, ***coarse;
 	int matrixSize;
 	int nmats;
+
+	//Automates output results 
+	char *datname="time.dat";
+	FILE *fdat;
 
 	//File
 	char *fname = "matrices_test.dat"; //Change to matrices_large.dat for performance evaluation
 	FILE *fh;
 
-	char *datname="time.dat";
-	FILE *fdat;
-
 	fh = fopen(fname, "r");
 	//First line indicates how many pairs of matrices there are and the matrix size
 	fscanf(fh, "%d %d\n", &nmats, &matrixSize);
+	
+	//Allocates and stores the data from the file to the heap
+	data=allocateData(matrixSize,nmats);
+	storeData(fh,data,matrixSize,nmats);
+
 	fclose(fh);
 
 
@@ -54,20 +62,19 @@ int main(int argc, char **argv) {
 	a = allocateMatrix(matrixSize);
 	b = allocateMatrix(matrixSize);
 	c = allocateMatrix(matrixSize);
-	coarse = allocateStructMatrix(matrixSize,threads);
+	coarse = allocateThreadsStructure(matrixSize,threads);
 	fine = allocateMatrix(matrixSize);
 
 	printf("Loading %d pairs of square matrices of size %d from %s...\n", nmats, matrixSize, fname);
 	
 	//Multiplication: sequential and parallel
-	for (int i=0;i<2;i++){
+	for (int i=0;i<1;i++){
 		
-		//Multiplication: serial and parallel
 		switch(i){
 			case 0:
 				//Serial multiplication
 				clock_gettime(CLOCKID, &start);
-				serial(fh,nmats,matrixSize,a,b,c);
+				seq(data,a,b,c,matrixSize,nmats);
 				clock_gettime(CLOCKID, &stop);
 				tseq=( stop.tv_sec - start.tv_sec ) + (double)( stop.tv_nsec - start.tv_nsec )/(double)BILLION;
 				break;
@@ -92,9 +99,9 @@ int main(int argc, char **argv) {
 	}
 
 
-	printf("Sequential execution time:\t %0.8f\n",tseq);
-	printf("Parallel coarse execution time:\t %0.8f\n",tcoarse);
-	printf("Parallel fine exeuction time: \t %0.8f\n",tfine);
+	printf("tseq: %0.8f \t",tseq);
+	printf("tcoarse: %0.8f \t",tcoarse);
+	printf("tfine:  %0.8f\n",tfine);
 
 	//Stores results in data file
 	fdat =fopen(datname,"a");
@@ -102,7 +109,7 @@ int main(int argc, char **argv) {
 	fclose(fdat);
 
 	// Free memory
-	free_memory(a,b,c,coarse,fine);
+	free_memory(a,b,c,data,coarse,fine);
 
 	printf("Done.\n");
 	return 0;

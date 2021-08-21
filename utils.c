@@ -4,6 +4,7 @@
 
 #include "utils.h"
 
+//parse console arguments
 int parse_cmd_arg(int argc, char**argv){
 	int threads=1;
 	for (int i=1; i<argc; i++){
@@ -19,6 +20,7 @@ int parse_cmd_arg(int argc, char**argv){
 	return threads;
 }
 
+//allocate matrix 2D
 double **allocateMatrix(int matrixSize) {
 	//printf("The matrix size is: %d\n",matrixSize);
 	int i;
@@ -36,8 +38,7 @@ double **allocateMatrix(int matrixSize) {
 	return temp;
 }
 
-double ***allocateStructMatrix(int matrixSize, int T){
-
+double ***allocateThreadsStructure(int matrixSize, int T){
 	int i,j;
 	double ***structure;
 	
@@ -53,6 +54,26 @@ double ***allocateStructMatrix(int matrixSize, int T){
 	}
 
 	return structure;
+}
+
+double ****allocateData(int matrixSize, int nmats){
+	int i,j,k;
+	double ****data;
+
+	//Allocate structure for the file data
+	data = (double ****) malloc(nmats*sizeof(double***));
+
+	//POINTER 4D array to iterate the data file
+	for (i=0;i<nmats;i++){
+		data[i]=(double ***) malloc(2*sizeof(double**));
+		for(j=0;j<matrixSize;j++){
+			data[i][j]=(double **) malloc(matrixSize*sizeof(double*));
+			for(k=0;k<matrixSize;k++){
+					data[i][j][k]=(double*) malloc(matrixSize*sizeof(double));
+			}
+		}
+	}
+	return data;
 }
 
 void printResult(int matrixSize, double **c){
@@ -77,31 +98,46 @@ int mat_diff_acum(double **A, double **B, int matrixSize){
 	return ACC;
 }
 
-void free_memory(double **A, double **B, double **C, double ***coarse, double **fine){
+void free_memory(double **A, double **B, double **C, double ****data, double ***coarse, double **fine){
 	free(*A);
+	free(A);
 	free(*B);
+	free(B);
 	free(*C);
+	free(C);
 	free(**coarse);
 	free(*coarse);
-	free(*fine);
-	free(A);
-	free(B);
-	free(C);
 	free(coarse);
+	free(*fine);
 	free(fine);
+	free(***data);
+	free(**data);
+	free(*data);
+	free(data);
 }
 
-void readFile (double **A, double **B, FILE *fh, int matrixSize){
+void storeData(FILE *fh, double ****data, int matrixSize, int nmats){
+	int i,j,k;
+	for(i=0;i<nmats;i++){
+		for (j=0;j<matrixSize;j++){
+			for(k=0;k<matrixSize;k++){
+				fscanf(fh,"%lf",&data[i][0][j][k]);
+			}
+		}
+		for (j=0;j<matrixSize;j++){
+			for(k=0;k<matrixSize;k++){
+				fscanf(fh,"%lf",&data[i][1][j][k]);
+			}
+		}
+	}
+}
+
+void getMatrices(double ****data, double **a, double **b, int matrixSize, int index){
 	int i,j;
 	for (i=0;i<matrixSize;i++){
-		for(j=0;j<matrixSize;j++){
-			fscanf(fh,"%lf",&A[i][j]);
+		for (j=0;j<matrixSize;j++){
+			a[i][j]=data[index][0][i][j];
+			b[i][j]=data[index][1][i][j];
 		}
 	}
-	for (i=0;i<matrixSize;i++){
-		for(j=0;j<matrixSize;j++){
-			fscanf(fh,"%lf",&B[i][j]);
-		}
-	}
-
 }
