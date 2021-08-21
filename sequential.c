@@ -19,7 +19,7 @@ void mm(int matrixSize, double** a, double** b, double** c) {
 	}
 }
 
-void seq(double ****data, double **a, double **b, double **c, int matrixSize, int nmats){
+void matmulseq(double ****data, double **a, double **b, double **c, int matrixSize, int nmats){
 	int i;
 	for(i=0;i<nmats;i++){
 		getMatrices(data,a,b,matrixSize,i);
@@ -27,5 +27,4 @@ void seq(double ****data, double **a, double **b, double **c, int matrixSize, in
 		mm(matrixSize,a,b,c);
 		printResult(matrixSize, c); //Remove this line for performance tests
 	}
-
 }

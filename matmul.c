@@ -8,19 +8,22 @@
  ============================================================================
  */
 
+#include <valgrind/callgrind.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
 #include "utils.h"
 #include "sequential.h"
-//#include "coarsemul.h"
-//#include "finemul.h"
+//#include "finemm.h"
+//#include "coarsemm.h"
 
 #define BILLION 1000000000L
 #define CLOCKID CLOCK_REALTIME
 
 int main(int argc, char **argv) {
+
+	CALLGRIND_START_INSTRUMENTATION;	
 
 	//Time measures
 	struct timespec start, stop;
@@ -28,12 +31,10 @@ int main(int argc, char **argv) {
 
 	//Gets the number of threads
 	int threads=parse_cmd_arg(argc,argv);
-	//printf("The number of threads is: %d\n",threads);
 
 	//Pointers to the Matrices
 	double **a, **b, **c;
 	double ****data;
-	double **fine, ***coarse;
 	int matrixSize;
 	int nmats;
 
@@ -51,10 +52,10 @@ int main(int argc, char **argv) {
 	
 	//Allocates and stores the data from the file to the heap
 	data=allocateData(matrixSize,nmats);
+	if (data==NULL) return 0;
 	storeData(fh,data,matrixSize,nmats);
 
 	fclose(fh);
-
 
 	printf("Start\n");
 
@@ -62,55 +63,46 @@ int main(int argc, char **argv) {
 	a = allocateMatrix(matrixSize);
 	b = allocateMatrix(matrixSize);
 	c = allocateMatrix(matrixSize);
-	coarse = allocateThreadsStructure(matrixSize,threads);
-	fine = allocateMatrix(matrixSize);
 
 	printf("Loading %d pairs of square matrices of size %d from %s...\n", nmats, matrixSize, fname);
-	
-	//Multiplication: sequential and parallel
-	for (int i=0;i<1;i++){
 		
-		switch(i){
-			case 0:
-				//Serial multiplication
-				clock_gettime(CLOCKID, &start);
-				seq(data,a,b,c,matrixSize,nmats);
-				clock_gettime(CLOCKID, &stop);
-				tseq=( stop.tv_sec - start.tv_sec ) + (double)( stop.tv_nsec - start.tv_nsec )/(double)BILLION;
-				break;
-			case 1:
-				//Parallel coarse multiplication
-				clock_gettime(CLOCKID, &start);
-				//coarsematmul(a,b,coarse,threads,matrixSize,nmats,fh);
-				clock_gettime(CLOCKID, &stop);
-				tcoarse=( stop.tv_sec - start.tv_sec ) + (double)( stop.tv_nsec - start.tv_nsec )/(double)BILLION;
-				break;
-			case 2:
-				//Parallel fine multiplication
-				clock_gettime(CLOCKID, &start);
-				//finematmul(a,b,fine,threads,matrixSize);
-				clock_gettime(CLOCKID, &stop);
-				tfine=( stop.tv_sec - start.tv_sec ) + (double)( stop.tv_nsec - start.tv_nsec )/(double)BILLION;
-				break;
-			default:
-				printf("Error\n");
-				break;
-		}	
-	}
+	//Sequencial multiplication
+	clock_gettime(CLOCKID, &start);
+	matmulseq(data,a,b,c,matrixSize,nmats);
+	clock_gettime(CLOCKID, &stop);
+	tseq=( stop.tv_sec - start.tv_sec ) + (double)( stop.tv_nsec - start.tv_nsec )/(double)BILLION;
+	
+	/*
+	//Parallel coarse multiplication
+	clock_gettime(CLOCKID, &start);
+	printf("Not working yet coarse\n");
+	clock_gettime(CLOCKID, &stop);
+	tcoarse=( stop.tv_sec - start.tv_sec ) + (double)( stop.tv_nsec - start.tv_nsec )/(double)BILLION;
 
+	//Parallel fine multiplication
+	clock_gettime(CLOCKID, &start);
+	printf("Suposs fine");
+	for (int i=0;i<nmats;i++){
+		getMatrices(data,a,b,matrixSize,i);
+		finematmul(a,b,fine,threads,matrixSize);
+		printResult(matrixSize,fine);
+	}
+	clock_gettime(CLOCKID, &stop);
+	tfine=( stop.tv_sec - start.tv_sec ) + (double)( stop.tv_nsec - start.tv_nsec )/(double)BILLION;
+	*/	
 
 	printf("tseq: %0.8f \t",tseq);
-	printf("tcoarse: %0.8f \t",tcoarse);
-	printf("tfine:  %0.8f\n",tfine);
+	//printf("tcoarse: %0.8f \t",tcoarse);
+	//printf("tfine:  %0.8f\n",tfine);
 
 	//Stores results in data file
 	fdat =fopen(datname,"a");
-	fprintf(fdat,"%0.8f,%0.8f,%0.8f\n",tseq,tcoarse,tfine);
+	fprintf(fdat,"%0.8f\n",tseq);
 	fclose(fdat);
 
-	// Free memory
-	free_memory(a,b,c,data,coarse,fine);
-
 	printf("Done.\n");
+	free_memory(a,b,c);
+	free_data(data,matrixSize,nmats);
+	CALLGRIND_STOP_INSTRUMENTATION;
 	return 0;
 }

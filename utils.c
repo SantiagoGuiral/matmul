@@ -4,7 +4,6 @@
 
 #include "utils.h"
 
-//parse console arguments
 int parse_cmd_arg(int argc, char**argv){
 	int threads=1;
 	for (int i=1; i<argc; i++){
@@ -20,7 +19,6 @@ int parse_cmd_arg(int argc, char**argv){
 	return threads;
 }
 
-//allocate matrix 2D
 double **allocateMatrix(int matrixSize) {
 	//printf("The matrix size is: %d\n",matrixSize);
 	int i;
@@ -38,38 +36,24 @@ double **allocateMatrix(int matrixSize) {
 	return temp;
 }
 
-double ***allocateThreadsStructure(int matrixSize, int T){
-	int i,j;
-	double ***structure;
-	
-	//Allocate structure for the matrices
-	structure = (double ***) malloc(T*sizeof(double**));
-	
-	//Pointers 3D array
-	for(i=0;i<T;i++){
-		structure[i] = (double **) malloc(matrixSize*sizeof(double*));
-		for(j=0;j<matrixSize;j++){
-			structure[i][j] = (double*) malloc(matrixSize*sizeof(double));
-		}
-	}
-
-	return structure;
-}
-
 double ****allocateData(int matrixSize, int nmats){
 	int i,j,k;
 	double ****data;
+	int pair=2;
 
 	//Allocate structure for the file data
 	data = (double ****) malloc(nmats*sizeof(double***));
 
 	//POINTER 4D array to iterate the data file
 	for (i=0;i<nmats;i++){
-		data[i]=(double ***) malloc(2*sizeof(double**));
-		for(j=0;j<matrixSize;j++){
+		data[i]=(double ***) malloc(pair*sizeof(double**));
+		if (data[i]==NULL) return NULL;
+		for(j=0;j<pair;j++){
 			data[i][j]=(double **) malloc(matrixSize*sizeof(double*));
+			if (data[i][j]==NULL) return NULL;
 			for(k=0;k<matrixSize;k++){
 					data[i][j][k]=(double*) malloc(matrixSize*sizeof(double));
+					if (data[i][j][k]==NULL) return NULL;
 			}
 		}
 	}
@@ -98,21 +82,28 @@ int mat_diff_acum(double **A, double **B, int matrixSize){
 	return ACC;
 }
 
-void free_memory(double **A, double **B, double **C, double ****data, double ***coarse, double **fine){
+void free_memory(double **A, double **B, double **C){
 	free(*A);
-	free(A);
 	free(*B);
-	free(B);
 	free(*C);
+	free(A);
+	free(B);
 	free(C);
-	free(**coarse);
-	free(*coarse);
-	free(coarse);
-	free(*fine);
-	free(fine);
-	free(***data);
-	free(**data);
-	free(*data);
+}
+
+void free_data(double ****data, int matrixSize, int nmats){
+	int i,j,k;
+	int pair=2;
+	
+	for(i=0;i<nmats;i++){
+		for(j=0;j<pair;j++){
+        	for(k=0;k<matrixSize;k++){
+           		free(data[i][j][k]);
+        	}
+        	free(data[i][j]);
+    	}
+    	free(data[i]);
+	}
 	free(data);
 }
 
@@ -141,3 +132,4 @@ void getMatrices(double ****data, double **a, double **b, int matrixSize, int in
 		}
 	}
 }
+
