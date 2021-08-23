@@ -15,7 +15,7 @@ UTILS=utils
 QUEUE=pt_queue
 
 
-$(MATMUL): $(MATMUL).c $(SEQ).o $(UTILS).o $(QUEUE).o #$(FINE).o #$(COARSE).o
+$(MATMUL): $(MATMUL).c $(SEQ).o $(UTILS).o $(QUEUE).o $(FINE).o $(COARSE).o
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 $(SEQ).o: $(SEQ).c $(SEQ).h
@@ -27,11 +27,11 @@ $(UTILS).o: $(UTILS).c $(UTILS).h
 $(QUEUE).o: $(QUEUE).c $(QUEUE).h
 	$(CC) $(CFLAGS) -c $(QUEUE).c $(LIBS)
 
-#$(FINE).o: $(FINE).c $(FINE).h
-#	$(CC) $(CFLAGS) -c $(FINE).c $(LIBS)
+$(FINE).o: $(FINE).c $(FINE).h
+	$(CC) $(CFLAGS) -c $(FINE).c $(LIBS)
 
-#$(COARSE).o: $(COARSE).c $(COARSE).h
-#	$(CC) $(CFLAGS) -c $(COARSE).c $(LIBS)
+$(COARSE).o: $(COARSE).c $(COARSE).h
+	$(CC) $(CFLAGS) -c $(COARSE).c $(LIBS)
 
 clean: 
 	$(RM) *.o

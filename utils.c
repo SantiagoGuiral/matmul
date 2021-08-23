@@ -60,6 +60,21 @@ double ****allocateData(int matrixSize, int nmats){
 	return data;
 }
 
+double ***allocate3DMatrix(int matrixSize, int nmats){
+	double ***coarse;
+	int i,j;
+	coarse = (double ***) malloc(nmats*sizeof(double**));
+	for (i=0;i<nmats;i++){
+		coarse[i]= (double **) malloc(matrixSize*sizeof(double*));
+		if (coarse[i]==NULL) return NULL;
+		for (j=0;j<matrixSize;j++){
+			coarse[i][j]= (double*) malloc (matrixSize*sizeof(double));
+			if (coarse[i][j]==NULL) return NULL;			
+		}
+	}
+	return coarse;
+}
+
 void printResult(int matrixSize, double **c){
 	int i, j;
 	for(i=0;i<matrixSize;i++){
@@ -67,6 +82,19 @@ void printResult(int matrixSize, double **c){
 			printf("%lf ", c[i][j]);
 		}
 		printf("\n");
+	}
+}
+
+void printCoarse(double ***coarse, int matrixSize, int nmats){
+	int i,j,k;
+	for (i=0;i<nmats;i++){
+		for(j=0;j<matrixSize;j++){
+			for (k=0;k<matrixSize;k++){
+				printf("%lf ",coarse[i][j][k]);
+			}
+			printf ("\n");
+		}
+		printf("\n\n");
 	}
 }
 
@@ -82,13 +110,15 @@ int mat_diff_acum(double **A, double **B, int matrixSize){
 	return ACC;
 }
 
-void free_memory(double **A, double **B, double **C){
+void free_memory(double **A, double **B, double **C, double **fine){
 	free(*A);
 	free(*B);
 	free(*C);
+	free(*fine);
 	free(A);
 	free(B);
 	free(C);
+	free(fine);
 }
 
 void free_data(double ****data, int matrixSize, int nmats){
@@ -105,6 +135,17 @@ void free_data(double ****data, int matrixSize, int nmats){
     	free(data[i]);
 	}
 	free(data);
+}
+
+void free_coarse(double ***coarse, int matrixSize, int nmats){
+	int i,j;
+	for (i=0;i<nmats;i++){
+		for (j=0;j<matrixSize;j++){
+			free(coarse[i][j]);
+		}
+		free(coarse[i]);
+	}
+	free(coarse);
 }
 
 void storeData(FILE *fh, double ****data, int matrixSize, int nmats){
