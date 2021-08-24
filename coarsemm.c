@@ -7,8 +7,7 @@
 #include "utils.h"
 
 void* thread_coarse_mul(void* args){
-	//variables to read the file
-	int i,j,k;
+	int i,j,k,pos;
 	double sum;
 
 	//Perform casting of void* argument to real argument type
@@ -18,7 +17,6 @@ void* thread_coarse_mul(void* args){
 	pt_queue_push(dat->msg_out, (void *)&dat->idx);
 
 	uint16_t idx;
-
 	//Iterates to assing work to the threads unitl no more available
 	for (;;){
 		pt_queue_pull(&dat->msg_in, (void *)&idx);
@@ -33,10 +31,10 @@ void* thread_coarse_mul(void* args){
 		}
 
 		//Thread work
-		for (k=start;k<end;k++){
+		for (pos=start;pos<end;pos++){
 			
 			//Read matrices
-			getMatrices(dat->data,dat->A,dat->B,dat->matrixSize,k);
+			getMatrices(dat->data,dat->A,dat->B,dat->matrixSize,pos);
 
 			printf("Coarse... Multiplying two matrices...\n");
 			for (i=0;i<dat->matrixSize;i++){
@@ -65,20 +63,20 @@ void matmulcoarse(double **A, double **B, double ***coarse, double ****data, uin
 	uint32_t max_matrices = ((uint32_t)(1<<16)/sizeof(double))/nmats;
 	if (max_matrices<1) max_matrices=1;
 
+	//Limits the number of threads
+	if(nmats<T){
+		T=nmats;
+		printf("The number of threads used are %d",T);
+	}
+
 	//pairs is the number of matmul each thread performs
 	uint32_t nmatrices=nmats/T;
 	if (nmatrices>max_matrices) nmatrices=max_matrices;
 
 	//Set queue for threads to message main when work is done
 	pt_queue_t msg_out;
-	pt_queue_init(&msg_out,100,sizeof(uint16_t));
+	pt_queue_init(&msg_out,500,sizeof(uint16_t));
 	
-	//
-	if(nmats<T){
-		T=nmats;
-		printf("The number of threads used are %d",T);
-	}
-
 	//Create threads
 	for (int i=0;i<T;i++){
 		th_data[i].idx = i;
@@ -90,7 +88,7 @@ void matmulcoarse(double **A, double **B, double ***coarse, double ****data, uin
 		th_data[i].matrixSize = matrixSize;
 		th_data[i].nmats = nmats;
 		th_data[i].nmatrices = nmatrices;
-		pt_queue_init(&th_data[i].msg_in,20,sizeof(uint16_t));
+		pt_queue_init(&th_data[i].msg_in,50,sizeof(uint16_t));
 		th_data[i].msg_out = &msg_out;
 		pthread_create(&th_ids[i],NULL,thread_coarse_mul,&th_data[i]);
 	}
@@ -112,7 +110,4 @@ void matmulcoarse(double **A, double **B, double ***coarse, double ****data, uin
 		pt_queue_pull(&msg_out,(void*)&th_idx);
 		pthread_cancel(th_ids[th_idx]);
 	}
-	free(th_data);
-	free(th_ids);
-
 }

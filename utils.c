@@ -60,11 +60,11 @@ double ****allocateData(int matrixSize, int nmats){
 	return data;
 }
 
-double ***allocate3DMatrix(int matrixSize, int nmats){
+double ***allocate3DMatrix(int matrixSize, int threads){
 	double ***coarse;
 	int i,j;
-	coarse = (double ***) malloc(nmats*sizeof(double**));
-	for (i=0;i<nmats;i++){
+	coarse = (double ***) malloc(threads*sizeof(double**));
+	for (i=0;i<threads;i++){
 		coarse[i]= (double **) malloc(matrixSize*sizeof(double*));
 		if (coarse[i]==NULL) return NULL;
 		for (j=0;j<matrixSize;j++){
@@ -85,16 +85,15 @@ void printResult(int matrixSize, double **c){
 	}
 }
 
-void printCoarse(double ***coarse, int matrixSize, int nmats){
+void printCoarse(double ***coarse, int matrixSize, int threads){
 	int i,j,k;
-	for (i=0;i<nmats;i++){
+	for (i=0;i<threads;i++){
 		for(j=0;j<matrixSize;j++){
 			for (k=0;k<matrixSize;k++){
 				printf("%lf ",coarse[i][j][k]);
 			}
 			printf ("\n");
 		}
-		printf("\n\n");
 	}
 }
 
@@ -137,9 +136,9 @@ void free_data(double ****data, int matrixSize, int nmats){
 	free(data);
 }
 
-void free_coarse(double ***coarse, int matrixSize, int nmats){
+void free_coarse(double ***coarse, int matrixSize, int threads){
 	int i,j;
-	for (i=0;i<nmats;i++){
+	for (i=0;i<threads;i++){
 		for (j=0;j<matrixSize;j++){
 			free(coarse[i][j]);
 		}

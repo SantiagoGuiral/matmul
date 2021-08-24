@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
 
 	//Time measures
 	struct timespec start, stop;
-	double tseq,  tfine;//, tcoarse;
+	double tseq,  tfine, tcoarse;
 
 	//Gets the number of threads
 	int threads=parse_cmd_arg(argc,argv);
@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
 	b = allocateMatrix(matrixSize);
 	c = allocateMatrix(matrixSize);
 	fine = allocateMatrix(matrixSize);
-	coarse = allocate3DMatrix(matrixSize,nmats);
+	coarse = allocate3DMatrix(matrixSize,threads);
 
 	printf("Loading %d pairs of square matrices of size %d from %s...\n", nmats, matrixSize, fname);
 		
@@ -68,7 +68,6 @@ int main(int argc, char **argv) {
 	matmulseq(data,a,b,c,matrixSize,nmats);
 	clock_gettime(CLOCKID, &stop);
 	tseq=( stop.tv_sec - start.tv_sec ) + (double)( stop.tv_nsec - start.tv_nsec )/(double)BILLION;
-
 	
 	//Parallel fine multiplication
 	clock_gettime(CLOCKID, &start);
@@ -80,23 +79,22 @@ int main(int argc, char **argv) {
 	clock_gettime(CLOCKID, &stop);
 	tfine=( stop.tv_sec - start.tv_sec ) + (double)( stop.tv_nsec - start.tv_nsec )/(double)BILLION;
 	
-	/*
 	//Parallel coarse multiplication
 	clock_gettime(CLOCKID, &start);
 	matmulcoarse(a,b,coarse,data,threads,matrixSize,nmats);
-	printCoarse(coarse,matrixSize,nmats);
+	printCoarse(coarse,matrixSize,threads);
 	clock_gettime(CLOCKID, &stop);
 	tcoarse=( stop.tv_sec - start.tv_sec ) + (double)( stop.tv_nsec - start.tv_nsec )/(double)BILLION;
-	*/
+	
 	
 	printf("tseq: %0.8f \t",tseq);
-	printf("tfine:  %0.8f\n",tfine);
-	//printf("tcoarse: %0.8f \t",tcoarse);
+	printf("tfine:  %0.8f\t",tfine);
+	printf("tcoarse: %0.8f \n",tcoarse);
 
 	printf("Done.\n");
 	free_memory(a,b,c,fine);
 	free_data(data,matrixSize,nmats);
-	free_coarse(coarse,matrixSize,nmats);
+	free_coarse(coarse,matrixSize,threads);
 	//CALLGRIND_STOP_INSTRUMENTATION;
 	return 0;
 }

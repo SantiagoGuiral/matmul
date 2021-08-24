@@ -11,7 +11,7 @@ typedef struct{
 	uint32_t matrixSize;	//Matrix Size
 	uint32_t nmats;			//Number of pair matrices
 	uint32_t nmatrices;		//Number of pairs to calculate by thread
-	uint8_t idx;			//Matrix Index
+	uint16_t idx;			//Matrix Index
 	double **A;				//Input
 	double **B;				//Input
 	double ***coarse;		//Ouput

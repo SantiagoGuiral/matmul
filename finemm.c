@@ -6,7 +6,6 @@
 #include "pt_queue.h"
 #include "utils.h"
 
-
 void* thread_fine_mul(void* args){
 	int i,j,k;
 	double sum;
@@ -58,19 +57,19 @@ void matmulfine(double **A, double **B, double **fine, uint8_t T, uint32_t matri
 	uint32_t max_lines = ((uint32_t)(1<<16)/sizeof(double))/matrixSize;
 	if (max_lines<1) max_lines=1;
 
+	//Limits the number of threads
+	if (matrixSize<T){
+		T=matrixSize;
+		printf("Working with %d threads equals to the matrix size\n",T);
+	}
+
 	//nlines is the number of matmul each thread performs
 	uint32_t nlines=matrixSize/T;
 	if (nlines>max_lines) nlines=max_lines;
 
 	//Set queue for threads to message main when work is done
 	pt_queue_t msg_out;
-	pt_queue_init(&msg_out,100,sizeof(uint16_t));
-
-	//Limits the number of threads
-	if (matrixSize<T){
-		T=matrixSize;
-		printf("Working with %d threads equals to the matrix size\n",T);
-	}
+	pt_queue_init(&msg_out,500,sizeof(uint16_t));
 
 	//Create threads
 	for (int i=0;i<T;i++){
@@ -81,7 +80,7 @@ void matmulfine(double **A, double **B, double **fine, uint8_t T, uint32_t matri
 		th_data[i].fine = fine;
 		th_data[i].T = T;
 		th_data[i].matrixSize = matrixSize;
-		pt_queue_init(&th_data[i].msg_in,20,sizeof(uint16_t));
+		pt_queue_init(&th_data[i].msg_in,50,sizeof(uint16_t));
 		th_data[i].msg_out = &msg_out;
 		pthread_create(&th_ids[i],NULL,thread_fine_mul,&th_data[i]);
 	}
