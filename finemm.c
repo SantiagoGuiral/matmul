@@ -31,17 +31,17 @@ void* thread_fine_mul(void* args){
 		}
 
 		//Thread work
-		printf("Fine... Multiplying two matrices...\n");
-			for (i=start;i<end;i++){
-				for(j=0;j<dat->matrixSize;j++){
-					sum=0.0;
-					//dot product
-					for(k=0;k<dat->matrixSize;k++){
-						sum = sum + dat->A[i][k]*dat->B[k][j];
-					}
-					dat->fine[i][j]=sum;
+		//printf("Fine... Multiplying two matrices...\n");
+		for (i=start;i<end;i++){
+			for(j=0;j<dat->matrixSize;j++){
+				sum=0.0;
+				//dot product
+				for(k=0;k<dat->matrixSize;k++){
+					sum = sum + dat->A[i][k]*dat->B[k][j];
 				}
+				dat->fine[i][j]=sum;
 			}
+		}
 		pt_queue_push(dat->msg_out, (void *)&dat->idx);
 	}
 	return NULL;

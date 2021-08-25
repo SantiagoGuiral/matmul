@@ -36,7 +36,7 @@ void* thread_coarse_mul(void* args){
 			//Read matrices
 			getMatrices(dat->data,dat->A,dat->B,dat->matrixSize,pos);
 
-			printf("Coarse... Multiplying two matrices...\n");
+			//printf("Coarse... Multiplying two matrices...\n");
 			for (i=0;i<dat->matrixSize;i++){
 				for(j=0;j<dat->matrixSize;j++){
 					sum=0.0;

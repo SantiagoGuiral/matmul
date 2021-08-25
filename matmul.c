@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
 	int nmats;
 
 	//File
-	char *fname = "matrices_test.dat"; //Change to matrices_large.dat for performance evaluation
+	char *fname = "matrices_large.dat"; //Change to matrices_large.dat for performance evaluation
 	FILE *fh;
 
 	fh = fopen(fname, "r");
@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
 	for (int i=0;i<nmats;i++){
 		getMatrices(data,a,b,matrixSize,i);
 		matmulfine(a,b,fine,threads,matrixSize);
-		printResult(matrixSize,fine);
+		//printResult(matrixSize,fine);
 	}
 	clock_gettime(CLOCKID, &stop);
 	tfine=( stop.tv_sec - start.tv_sec ) + (double)( stop.tv_nsec - start.tv_nsec )/(double)BILLION;
@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
 	//Parallel coarse multiplication
 	clock_gettime(CLOCKID, &start);
 	matmulcoarse(a,b,coarse,data,threads,matrixSize,nmats);
-	printCoarse(coarse,matrixSize,threads);
+	//printCoarse(coarse,matrixSize,threads);
 	clock_gettime(CLOCKID, &stop);
 	tcoarse=( stop.tv_sec - start.tv_sec ) + (double)( stop.tv_nsec - start.tv_nsec )/(double)BILLION;
 	
@@ -90,8 +90,10 @@ int main(int argc, char **argv) {
 	printf("tseq: %0.8f \t",tseq);
 	printf("tfine:  %0.8f\t",tfine);
 	printf("tcoarse: %0.8f \n",tcoarse);
-
+	printf("SpeedUp fine: %0.8f\t", tseq/tfine);
+	printf("SpeedUp coarse: %0.8f\n", tseq/tcoarse);
 	printf("Done.\n");
+
 	free_memory(a,b,c,fine);
 	free_data(data,matrixSize,nmats);
 	free_coarse(coarse,matrixSize,threads);

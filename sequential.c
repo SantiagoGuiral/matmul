@@ -23,8 +23,8 @@ void matmulseq(double ****data, double **a, double **b, double **c, int matrixSi
 	int i;
 	for(i=0;i<nmats;i++){
 		getMatrices(data,a,b,matrixSize,i);
-		printf("Sequential... Multiplying two matrices...\n"); //Remove this line for performance tests
+		//printf("Sequential... Multiplying two matrices...\n"); //Remove this line for performance tests
 		mm(matrixSize,a,b,c);
-		printResult(matrixSize, c); //Remove this line for performance tests
+		//printResult(matrixSize, c); //Remove this line for performance tests
 	}
 }
