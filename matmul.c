@@ -28,6 +28,9 @@ int main(int argc, char **argv) {
 	//Time measures
 	struct timespec start, stop;
 	double tseq,  tfine, tcoarse;
+	double scoarse, sfine;
+
+
 
 	//Gets the number of threads
 	int threads=parse_cmd_arg(argc,argv);
@@ -86,13 +89,23 @@ int main(int argc, char **argv) {
 	clock_gettime(CLOCKID, &stop);
 	tcoarse=( stop.tv_sec - start.tv_sec ) + (double)( stop.tv_nsec - start.tv_nsec )/(double)BILLION;
 	
+	sfine=tseq/tfine;
+	scoarse=tseq/tcoarse;
 	
 	printf("tseq: %0.8f \t",tseq);
 	printf("tfine:  %0.8f\t",tfine);
 	printf("tcoarse: %0.8f \n",tcoarse);
-	printf("SpeedUp fine: %0.8f\t", tseq/tfine);
-	printf("SpeedUp coarse: %0.8f\n", tseq/tcoarse);
+	printf("SpeedUp fine: %0.8f\t", sfine);
+	printf("SpeedUp coarse: %0.8f\n", scoarse);
 	printf("Done.\n");
+
+	//Store automated data
+	char *fstore = "time.dat";
+	FILE *sh;
+
+	sh=fopen(fstore,"a");
+	fprintf(sh,"%0.8f,%0.8f,%0.8f,%0.8f,%0.8f,%d\n",tseq,tfine,tcoarse,scoarse,sfine,threads);
+	fclose(sh);
 
 	free_memory(a,b,c,fine);
 	free_data(data,matrixSize,nmats);
