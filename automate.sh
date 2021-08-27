@@ -1,6 +1,6 @@
 #! /bin/bash
 
-THREADS=1
+THREADS=2
 RESULTS="time.dat"
 MATMUL="matmul"
 
@@ -14,7 +14,7 @@ fi
 if [[ -e "$MATMUL" ]]
 then
 	echo "Multithreading matrix multiplication"
-	for i in {1..10}
+	for i in {1..100}
 	do
 		echo "Iteration $i with $THREADS threads"
 		./matmul -T $THREADS

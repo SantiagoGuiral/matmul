@@ -104,7 +104,7 @@ int main(int argc, char **argv) {
 	FILE *sh;
 
 	sh=fopen(fstore,"a");
-	fprintf(sh,"%0.8f,%0.8f,%0.8f,%0.8f,%0.8f,%d\n",tseq,tfine,tcoarse,scoarse,sfine,threads);
+	fprintf(sh,"%0.8f,%0.8f,%0.8f,%0.8f,%0.8f,%d\n",tseq,tfine,tcoarse,sfine,scoarse,threads);
 	fclose(sh);
 
 	free_memory(a,b,c,fine);
