@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
 
 	fclose(fh);
 
-	printf("Start\n");
+	printf("Start, Threads : %d\n",threads);
 
 	//Allocate matrices memory
 	a = allocateMatrix(matrixSize);

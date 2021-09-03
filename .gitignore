@@ -1,3 +1,7 @@
 *.o
 time.dat
 matmul
+*.zip
+*.csv
+*.pdf
+*.png
