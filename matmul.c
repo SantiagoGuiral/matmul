@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
 	int nmats;
 
 	//File
-	char *fname = "matrices_large.dat"; //Change to matrices_large.dat for performance evaluation
+	char *fname = "matrices_test.dat"; //Change to matrices_large.dat for performance evaluation
 	FILE *fh;
 
 	fh = fopen(fname, "r");
@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
 	//Parallel coarse multiplication
 	clock_gettime(CLOCKID, &start);
 	matmulcoarse(a,b,coarse,data,threads,matrixSize,nmats);
-	//printCoarse(coarse,matrixSize,threads);
+	printCoarse(coarse,matrixSize,threads);
 	clock_gettime(CLOCKID, &stop);
 	tcoarse=( stop.tv_sec - start.tv_sec ) + (double)( stop.tv_nsec - start.tv_nsec )/(double)BILLION;
 	
